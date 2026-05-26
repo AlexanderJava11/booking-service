@@ -60,7 +60,7 @@ public class CustomerController {
             logger.info("Kund med ID {} har tagits bort", id);
             redirect.addFlashAttribute("message", "Kunden är borttagen.");
         } else  {
-            logger.info("Kund med ID {} har inte tas bort", id);
+            logger.warn("Kund med ID {} har inte tas bort", id);
             redirect.addFlashAttribute("error", "Kunden kunde inte tas bort eftersom kunden har bokningar.");
         }
         return "redirect:/customers";
