@@ -3,7 +3,7 @@ package alex.villa_avougjagi.service;
 import alex.villa_avougjagi.dto.RoomDTO;
 import alex.villa_avougjagi.models.Room;
 import alex.villa_avougjagi.models.RoomType;
-import alex.villa_avougjagi.repositories.RoomRepositories;
+import alex.villa_avougjagi.repositories.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,28 +14,28 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RoomService {
 
-    private final RoomRepositories roomRepositories;
+    private final RoomRepository roomRepository;
 
     public List<RoomDTO> findAll() {
-        return roomRepositories.findAll()
+        return roomRepository.findAll()
                 .stream()
                 .map(this::toDTO)
                 .toList();
     }
 
     public RoomDTO findById(Long id) {
-        return roomRepositories.findById(id)
+        return roomRepository.findById(id)
                 .map(this::toDTO)
                 .orElseThrow(() -> new RuntimeException("Rummet finns inte"));
     }
 
     public RoomDTO save(RoomDTO dto) {
-        Room savedRoom = roomRepositories.save(toEntity(dto));
+        Room savedRoom = roomRepository.save(toEntity(dto));
         return toDTO(savedRoom);
     }
 
     public void delete(Long id) {
-        roomRepositories.deleteById(id);
+        roomRepository.deleteById(id);
     }
 
     public List<RoomDTO> findAvailableRooms(LocalDate checkIn, LocalDate checkOut, int guests) {
@@ -46,7 +46,7 @@ public class RoomService {
             return List.of();
         }
 
-        return roomRepositories.findAvailableRooms(checkIn, checkOut, guests, bookingId)
+        return roomRepository.findAvailableRooms(checkIn, checkOut, guests, bookingId)
                 .stream()
                 .filter(room -> room.getCapacity() >= guests)
                 .map(this::toDTO)

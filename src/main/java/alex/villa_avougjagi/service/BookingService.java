@@ -2,9 +2,9 @@ package alex.villa_avougjagi.service;
 
 import alex.villa_avougjagi.dto.BookingDTO;
 import alex.villa_avougjagi.models.Booking;
-import alex.villa_avougjagi.repositories.BookingRepositories;
-import alex.villa_avougjagi.repositories.CustomerRepositories;
-import alex.villa_avougjagi.repositories.RoomRepositories;
+import alex.villa_avougjagi.repositories.BookingRepository;
+import alex.villa_avougjagi.repositories.CustomerRepository;
+import alex.villa_avougjagi.repositories.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,9 +15,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BookingService {
 
-    private final BookingRepositories bookingRepository;
-    private final CustomerRepositories customerRepository;
-    private final RoomRepositories roomRepository;
+    private final BookingRepository bookingRepository;
+    private final CustomerRepository customerRepository;
+    private final RoomRepository roomRepository;
     private final RoomService roomService;
 
     public List<BookingDTO> findAll() {
