@@ -1,5 +1,6 @@
 package alex.villa_avougjagi.controller;
 
+import alex.villa_avougjagi.models.Customer;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,12 @@ public class CustomerController {
     public String listCustomers(Model model) {
         model.addAttribute("customers", customerService.findAll());
         return "customers/list";
+    }
+
+    @GetMapping("/new")
+    public String showCreateForm(Model model) {
+        model.addAttribute("customer", new CustomerDTO());
+        return "customers/form";
     }
 
 }
