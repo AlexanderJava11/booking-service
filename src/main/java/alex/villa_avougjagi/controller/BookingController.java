@@ -5,10 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -88,5 +85,23 @@ public class BookingController {
         redirectAttributes.addFlashAttribute("message", "Bokningen sparades.");
         return "redirect:/bookings";
     }
+
+    @GetMapping("/change/{id}")
+    public String showChangeForm(@PathVariable Long id, Model model) {
+        BookingDTO bookingDTO = bookingService.findById(id);
+
+        if (bookingDTO == null) {
+            return "redirect:/bookings";
+        }
+
+        model.addAttribute("booking", bookingDTO);
+        model.addAttribute("customers", customerService.findAll());
+        model.addAttribute("rooms", roomService.findAvailableRooms(
+                bookingDTO.getCheckInDate(),
+                bookingDTO.getCheckOutDate(),
+                bookingDTO.getNumberOfGuests(),
+                bookingDTO.getId()
+        ));
+        return "customers/bookings/form";
     }
 }
