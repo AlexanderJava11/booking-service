@@ -1,12 +1,16 @@
 package alex.villa_avougjagi.controller;
 
 import alex.villa_avougjagi.models.Customer;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
@@ -27,6 +31,15 @@ public class CustomerController {
     public String showCreateForm(Model model) {
         model.addAttribute("customer", new CustomerDTO());
         return "customers/form";
+    }
+
+    @PostMapping("/save")
+    public String saveCustomer(@Valid @ModelAttribute("customer") CustomerDTO customerDTO, BindingResult result) {
+        if (result.hasErrors()) {
+            return "customers/form";
+        }
+        customerService.save(customerDTO);
+        return "redirect:/customers";
     }
 
 }
