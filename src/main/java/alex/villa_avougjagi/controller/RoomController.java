@@ -48,4 +48,10 @@ public class RoomController {
         model.addAttribute("roomTypes", RoomType.values());
         return "customers/room/form";
     }
+
+    @GetMapping("/delete/{id}")
+    public String deleteRoom(@PathVariable Long id) {
+        roomService.delete(id);
+        return "redirect:/rooms";
+    }
 }
