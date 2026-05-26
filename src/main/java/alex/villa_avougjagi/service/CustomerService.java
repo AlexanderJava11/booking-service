@@ -39,6 +39,10 @@ public class CustomerService {
             return false;
         }
 
+        if (!customerRepository.existsById(id)) {
+            return false;
+        }
+
         customerRepository.deleteById(id);
         return true;
     }

@@ -33,10 +33,13 @@ public class CustomerController {
     }
 
     @PostMapping("/save")
-    public String saveCustomer(@Valid @ModelAttribute("customer") CustomerDTO customerDTO, BindingResult result) {
+    public String saveCustomer(@Valid @ModelAttribute("customer") CustomerDTO customerDTO,
+                               BindingResult result) {
+
         if (result.hasErrors()) {
             return "customers/form";
         }
+
         customerService.save(customerDTO);
         return "redirect:/customers";
     }
@@ -60,11 +63,11 @@ public class CustomerController {
         if (success) {
             logger.info("Kund med ID {} har tagits bort", id);
             redirect.addFlashAttribute("message", "Kunden är borttagen.");
-        } else  {
-            logger.warn("Kund med ID {} har inte tas bort", id);
+        } else {
+            logger.warn("Kund med ID {} kunde inte tas bort", id);
             redirect.addFlashAttribute("error", "Kunden kunde inte tas bort eftersom kunden har bokningar.");
         }
+
         return "redirect:/customers";
     }
-
 }

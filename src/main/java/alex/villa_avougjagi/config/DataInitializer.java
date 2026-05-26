@@ -15,7 +15,7 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (roomRepository.count () > 0) {
+        if (roomRepository.count() > 0) {
             return;
         }
 

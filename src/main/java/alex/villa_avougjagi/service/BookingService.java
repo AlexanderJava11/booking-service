@@ -34,6 +34,10 @@ public class BookingService {
     }
 
     public boolean saveBooking(BookingDTO dto) {
+        if (dto.getCustomerId() == null || dto.getRoomId() == null) {
+            return false;
+        }
+
         if (dto.getCheckInDate() == null || dto.getCheckOutDate() == null) {
             return false;
         }
@@ -86,18 +90,22 @@ public class BookingService {
         dto.setCustomerFirstName(booking.getCustomer().getFirstName());
         dto.setCustomerLastName(booking.getCustomer().getLastName());
 
-        dto.setRoomId(booking.getRoom().getId());
+        dto.setRoomId((long) booking.getRoom().getId());
         dto.setRoomNumber(booking.getRoom().getRoomNumber());
         dto.setRoomType(booking.getRoom().getRoomType().getDisplayName());
-        dto.setRoomPricePerNight(booking.getRoom().getPricePerNight());
+        dto.setRoomPricePerNight((int) booking.getRoom().getPricePerNight());
 
         dto.setCheckInDate(booking.getCheckInDate());
         dto.setCheckOutDate(booking.getCheckOutDate());
         dto.setNumberOfGuests(booking.getNumberOfGuests());
 
-        long nights = ChronoUnit.DAYS.between(booking.getCheckInDate(), booking.getCheckOutDate());
+        long nights = ChronoUnit.DAYS.between(
+                booking.getCheckInDate(),
+                booking.getCheckOutDate()
+        );
+
         dto.setNights(nights);
-        dto.setTotalPrice((int) nights * booking.getRoom().getPricePerNight());
+        dto.setTotalPrice((int) ((int) nights * booking.getRoom().getPricePerNight()));
 
         return dto;
     }

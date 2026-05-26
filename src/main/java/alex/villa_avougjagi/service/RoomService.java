@@ -3,6 +3,7 @@ package alex.villa_avougjagi.service;
 import alex.villa_avougjagi.dto.RoomDTO;
 import alex.villa_avougjagi.models.Room;
 import alex.villa_avougjagi.models.RoomType;
+import alex.villa_avougjagi.repositories.BookingRepository;
 import alex.villa_avougjagi.repositories.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.List;
 public class RoomService {
 
     private final RoomRepository roomRepository;
+    private final BookingRepository bookingRepository;
 
     public List<RoomDTO> findAll() {
         return roomRepository.findAll()
@@ -26,7 +28,7 @@ public class RoomService {
     public RoomDTO findById(Long id) {
         return roomRepository.findById(id)
                 .map(this::toDTO)
-                .orElseThrow(() -> new RuntimeException("Rummet finns inte"));
+                .orElse(null);
     }
 
     public RoomDTO save(RoomDTO dto) {
@@ -34,13 +36,23 @@ public class RoomService {
         return toDTO(savedRoom);
     }
 
-    public void delete(Long id) {
+    public boolean delete(Long id) {
+        if (!roomRepository.existsById(id)) {
+            return false;
+        }
+
+        if (bookingRepository.existsByRoomId(id)) {
+            return false;
+        }
+
         roomRepository.deleteById(id);
+        return true;
     }
 
     public List<RoomDTO> findAvailableRooms(LocalDate checkIn, LocalDate checkOut, int guests) {
         return findAvailableRooms(checkIn, checkOut, guests, null);
     }
+
     public List<RoomDTO> findAvailableRooms(LocalDate checkIn, LocalDate checkOut, int guests, Long bookingId) {
         if (checkIn == null || checkOut == null || !checkOut.isAfter(checkIn) || guests < 1) {
             return List.of();
@@ -70,11 +82,11 @@ public class RoomService {
 
     private RoomDTO toDTO(Room room) {
         return RoomDTO.builder()
-                .id(room.getId())
+                .id((long) room.getId())
                 .roomNumber(room.getRoomNumber())
                 .roomType(room.getRoomType().name())
                 .extraBeds(room.getExtraBeds())
-                .pricePerNight(room.getPricePerNight())
+                .pricePerNight((int) room.getPricePerNight())
                 .capacity(room.getCapacity())
                 .build();
     }
@@ -82,10 +94,12 @@ public class RoomService {
     private Room toEntity(RoomDTO dto) {
         RoomType type = RoomType.valueOf(dto.getRoomType());
         int extraBeds = type == RoomType.SINGLE ? 0 : dto.getExtraBeds();
-        int price = dto.getPricePerNight() > 0 ? dto.getPricePerNight() : defaultPrice(type, extraBeds);
+        int price = dto.getPricePerNight() > 0
+                ? dto.getPricePerNight()
+                : defaultPrice(type, extraBeds);
 
         return Room.builder()
-                .id(dto.getId())
+                .id(Math.toIntExact(dto.getId()))
                 .roomNumber(dto.getRoomNumber())
                 .roomType(type)
                 .extraBeds(extraBeds)
@@ -96,5 +110,4 @@ public class RoomService {
     private int defaultPrice(RoomType type, int extraBeds) {
         return type == RoomType.SINGLE ? 995 : 1495 + (extraBeds * 250);
     }
-
 }

@@ -13,9 +13,10 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     @Query("""
         SELECT r FROM Room r
         WHERE :guests > 0
-        AND r.id NOT IN (
-            SELECT b.room.id FROM Booking b
-            WHERE b.checkInDate < :checkOutDate
+        AND NOT EXISTS (
+            SELECT b FROM Booking b
+            WHERE b.room = r
+            AND b.checkInDate < :checkOutDate
             AND b.checkOutDate > :checkInDate
             AND (:bookingId IS NULL OR b.id <> :bookingId)
         )
