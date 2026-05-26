@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/customers")
@@ -49,6 +50,20 @@ public class CustomerController {
 
         model.addAttribute("customer", customer);
         return "customers/form";
+    }
+
+    @GetMapping("/delete/{id}")
+    public String deleteCustomer(@PathVariable Long id, RedirectAttributes redirect) {
+        boolean success = customerService.delete(id);
+
+        if (success) {
+            logger.info("Kund med ID {} har tagits bort", id);
+            redirect.addFlashAttribute("message", "Kunden är borttagen.");
+        } else  {
+            logger.info("Kund med ID {} har inte tas bort", id);
+            redirect.addFlashAttribute("error", "Kunden kunde inte tas bort eftersom kunden har bokningar.");
+        }
+        return "redirect:/customers";
     }
 
 }
