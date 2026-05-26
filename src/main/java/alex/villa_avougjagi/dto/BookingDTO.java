@@ -18,10 +18,10 @@ public class BookingDTO {
     private Long roomId;
 
     @NotNull(message = "Incheckningsdatum krävs")
-    private LocalDate checkinDate;
+    private LocalDate checkInDate;
 
     @NotNull(message = "Utcheckningsdatum krävs")
-    private LocalDate checkoutDate;
+    private LocalDate checkOutDate;
 
     @Min(value = 1, message = "Minst 1 person krävs")
     private int numberOfGuests;

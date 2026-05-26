@@ -1,6 +1,7 @@
 package alex.villa_avougjagi.controller;
 
-import alex.villa_avougjagi.models.Customer;
+import alex.villa_avougjagi.dto.CustomerDTO;
+import alex.villa_avougjagi.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;

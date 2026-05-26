@@ -1,6 +1,8 @@
 package alex.villa_avougjagi.controller;
 
+import alex.villa_avougjagi.dto.RoomDTO;
 import alex.villa_avougjagi.models.RoomType;
+import alex.villa_avougjagi.service.RoomService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;

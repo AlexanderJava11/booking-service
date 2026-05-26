@@ -2,6 +2,7 @@ package alex.villa_avougjagi.config;
 
 import alex.villa_avougjagi.models.Room;
 import alex.villa_avougjagi.models.RoomType;
+import alex.villa_avougjagi.repositories.RoomRepositories;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
