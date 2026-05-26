@@ -104,4 +104,16 @@ public class BookingController {
         ));
         return "customers/bookings/form";
     }
+
+    @GetMapping("/delete/{id}")
+    public String deleteBooking(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        boolean deleted = bookingService.deleteById(id);
+
+        if (deleted) {
+            redirectAttributes.addFlashAttribute("message", "Bokningen togs bort.");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Kunde inte ta bort bokningen.");
+        }
+        return "redirect:/bookings";
+    }
 }
