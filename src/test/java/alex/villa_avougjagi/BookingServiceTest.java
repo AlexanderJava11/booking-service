@@ -1,6 +1,8 @@
 package alex.villa_avougjagi;
 
+import alex.villa_avougjagi.client.CustomerClient;
 import alex.villa_avougjagi.dto.BookingDTO;
+import alex.villa_avougjagi.dto.CustomerDTO;
 import alex.villa_avougjagi.models.Booking;
 import alex.villa_avougjagi.models.Room;
 import alex.villa_avougjagi.repositories.BookingRepository;
@@ -29,13 +31,13 @@ class BookingServiceTest {
     private BookingRepository bookingRepository;
 
     @Mock
-    private CustomerRepository customerRepository;
-
-    @Mock
     private RoomRepository roomRepository;
 
     @Mock
     private RoomService roomService;
+
+    @Mock
+    private CustomerClient customerClient;
 
     @InjectMocks
     private BookingService bookingService;
@@ -54,9 +56,13 @@ class BookingServiceTest {
 
     @Test
     void saveBooking_shouldSave_whenBookingIsValid() {
-        // Förbered: kunden finns och rummet är tillgängligt.
-        Customer customer = mock(Customer.class);
+        CustomerDTO customer = new CustomerDTO();
+        customer.setId(1L);
+
         Room room = mock(Room.class);
+
+        when(customerClient.findById(1L))
+                .thenReturn(customer);
 
         when(roomService.isRoomAvailable(
                 2L,
@@ -66,16 +72,11 @@ class BookingServiceTest {
                 null
         )).thenReturn(true);
 
-        when(customerRepository.findById(1L))
-                .thenReturn(Optional.of(customer));
-
         when(roomRepository.findById(2L))
                 .thenReturn(Optional.of(room));
 
-        // Kör.
         boolean result = bookingService.saveBooking(dto);
 
-        // Kontrollera både svaret och det som sparas.
         assertTrue(result);
 
         ArgumentCaptor<Booking> captor =
@@ -85,7 +86,7 @@ class BookingServiceTest {
 
         Booking savedBooking = captor.getValue();
 
-        assertSame(customer, savedBooking.getCustomer());
+        assertEquals(1L, savedBooking.getCustomerId());
         assertSame(room, savedBooking.getRoom());
         assertEquals(dto.getCheckInDate(), savedBooking.getCheckInDate());
         assertEquals(dto.getCheckOutDate(), savedBooking.getCheckOutDate());
@@ -94,6 +95,12 @@ class BookingServiceTest {
 
     @Test
     void saveBooking_shouldReject_whenCheckOutIsBeforeCheckIn() {
+        CustomerDTO customer = new CustomerDTO();
+        customer.setId(1L);
+
+        when(customerClient.findById(1L))
+                .thenReturn(customer);
+
         dto.setCheckOutDate(dto.getCheckInDate().minusDays(1));
 
         boolean result = bookingService.saveBooking(dto);
@@ -104,6 +111,12 @@ class BookingServiceTest {
 
     @Test
     void saveBooking_shouldReject_whenDatesAreEqual() {
+        CustomerDTO customer = new CustomerDTO();
+        customer.setId(1L);
+
+        when(customerClient.findById(1L))
+                .thenReturn(customer);
+
         dto.setCheckOutDate(dto.getCheckInDate());
 
         boolean result = bookingService.saveBooking(dto);
@@ -113,8 +126,9 @@ class BookingServiceTest {
     }
 
     @Test
-    void saveBooking_shouldReject_whenCustomerIdIsMissing() {
-        dto.setCustomerId(null);
+    void saveBooking_shouldReject_whenCustomerDoesNotExist() {
+        when(customerClient.findById(1L))
+                .thenReturn(null);
 
         boolean result = bookingService.saveBooking(dto);
 
@@ -124,6 +138,12 @@ class BookingServiceTest {
 
     @Test
     void saveBooking_shouldReject_whenRoomIsUnavailable() {
+        CustomerDTO customer = new CustomerDTO();
+        customer.setId(1L);
+
+        when(customerClient.findById(1L))
+                .thenReturn(customer);
+
         when(roomService.isRoomAvailable(
                 2L,
                 dto.getCheckInDate(),
@@ -136,7 +156,7 @@ class BookingServiceTest {
 
         assertFalse(result);
         verify(bookingRepository, never()).save(any(Booking.class));
-        verifyNoInteractions(customerRepository, roomRepository);
+        verify(roomRepository, never()).findById(anyLong());
     }
 
     @Test
