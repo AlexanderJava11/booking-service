@@ -1,0 +1,65 @@
+services:
+
+  booking-db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: Pensionatendb
+      MYSQL_ROOT_PASSWORD: bookingpassword
+    ports:
+      - "3307:3306"
+    volumes:
+      - booking-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pbookingpassword"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  customer-db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: customerdb
+      MYSQL_ROOT_PASSWORD: customerpassword
+    ports:
+      - "3308:3306"
+    volumes:
+      - customer-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pcustomerpassword"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  booking-service:
+    build:
+      context: "."
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: "jdbc:mysql://booking-db:3306/Pensionatendb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+      DB_USERNAME: root
+      DB_PASSWORD: bookingpassword
+      CUSTOMER_SERVICE_URL: "http://customer-service:8081"
+    depends_on:
+      booking-db:
+        condition: service_healthy
+      customer-service:
+        condition: service_started
+
+  customer-service:
+    build:
+      context: "../customer-service"
+    ports:
+      - "8081:8081"
+    environment:
+      CUSTOMER_DB_URL: "jdbc:mysql://customer-db:3306/customerdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+      CUSTOMER_DB_USERNAME: root
+      CUSTOMER_DB_PASSWORD: customerpassword
+      BOOKING_SERVICE_URL: "http://booking-service:8080"
+    depends_on:
+      customer-db:
+        condition: service_healthy
+
+volumes:
+  booking-db-data:
+  customer-db-data:
