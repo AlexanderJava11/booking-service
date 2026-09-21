@@ -75,6 +75,13 @@ public class BookingService {
         bookingRepository.save(booking);
         return true;
     }
+    public boolean hasActiveBookings(Long customerId) {
+        return bookingRepository
+                .existsByCustomerIdAndCheckOutDateGreaterThanEqual(
+                        customerId,
+                        java.time.LocalDate.now()
+                );
+    }
 
     public boolean deleteById(Long id) {
         if (!bookingRepository.existsById(id)) {

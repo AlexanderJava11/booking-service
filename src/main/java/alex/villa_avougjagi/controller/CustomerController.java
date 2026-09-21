@@ -126,11 +126,32 @@ public class CustomerController {
             @PathVariable Long id,
             RedirectAttributes redirect) {
 
-        redirect.addFlashAttribute(
-                "error",
-                "Borttagning är tillfälligt avstängd medan "
-                        + "kontrollen av aktiva bokningar kopplas in."
-        );
+        try {
+            customerClient.delete(id);
+
+            redirect.addFlashAttribute(
+                    "message",
+                    "Kunden togs bort."
+            );
+
+        } catch (HttpClientErrorException.Conflict exception) {
+            redirect.addFlashAttribute(
+                    "error",
+                    "Kunden kan inte tas bort eftersom kunden har en aktiv bokning."
+            );
+
+        } catch (HttpClientErrorException.NotFound exception) {
+            redirect.addFlashAttribute(
+                    "error",
+                    "Kunden kunde inte hittas."
+            );
+
+        } catch (RestClientException exception) {
+            redirect.addFlashAttribute(
+                    "error",
+                    "Kunden kunde inte tas bort. Försök igen senare."
+            );
+        }
 
         return "redirect:/customers";
     }

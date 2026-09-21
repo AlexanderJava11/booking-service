@@ -61,4 +61,9 @@ public class CustomerClient {
             );
         }
     }
+    public void delete(Long id) {
+        restTemplate.delete(
+                customersUrl + "/" + id
+        );
+    }
 }

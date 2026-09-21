@@ -2,10 +2,8 @@ package alex.villa_avougjagi;
 
 import alex.villa_avougjagi.dto.BookingDTO;
 import alex.villa_avougjagi.models.Booking;
-import alex.villa_avougjagi.models.Customer;
 import alex.villa_avougjagi.models.Room;
 import alex.villa_avougjagi.repositories.BookingRepository;
-import alex.villa_avougjagi.repositories.CustomerRepository;
 import alex.villa_avougjagi.repositories.RoomRepository;
 import alex.villa_avougjagi.service.BookingService;
 import alex.villa_avougjagi.service.RoomService;
