@@ -82,7 +82,7 @@ public class RoomService {
 
     private RoomDTO toDTO(Room room) {
         return RoomDTO.builder()
-                .id((long) room.getId())
+                .id(room.getId())
                 .roomNumber(room.getRoomNumber())
                 .roomType(room.getRoomType().name())
                 .extraBeds(room.getExtraBeds())
@@ -99,7 +99,7 @@ public class RoomService {
                 : defaultPrice(type, extraBeds);
 
         return Room.builder()
-                .id(Math.toIntExact(dto.getId()))
+                .id(dto.getId())
                 .roomNumber(dto.getRoomNumber())
                 .roomType(type)
                 .extraBeds(extraBeds)
