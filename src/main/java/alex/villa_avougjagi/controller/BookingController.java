@@ -2,7 +2,7 @@ package alex.villa_avougjagi.controller;
 
 import alex.villa_avougjagi.dto.BookingDTO;
 import alex.villa_avougjagi.service.BookingService;
-import alex.villa_avougjagi.service.CustomerService;
+import alex.villa_avougjagi.client.CustomerClient;
 import alex.villa_avougjagi.service.RoomService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BookingController {
 
-    private final CustomerService customerService;
+    private final CustomerClient customerClient;
     private final RoomService roomService;
     private final BookingService bookingService;
 
@@ -32,14 +32,14 @@ public class BookingController {
     @GetMapping("/new")
     public String showBookingForm(Model model) {
         model.addAttribute("booking", new BookingDTO());
-        model.addAttribute("customers", customerService.findAll());
+        model.addAttribute("customers", customerClient.findAll());
         model.addAttribute("rooms", List.of());
         return "customers/bookings/form";
     }
 
     @PostMapping("/search")
     public String searchRooms(@ModelAttribute("booking") BookingDTO bookingDTO, Model model) {
-        model.addAttribute("customers", customerService.findAll());
+        model.addAttribute("customers", customerClient.findAll());
 
         if (bookingDTO.getCheckInDate() != null &&
             bookingDTO.getCheckOutDate() != null &&
@@ -67,7 +67,7 @@ public class BookingController {
                               RedirectAttributes redirectAttributes) {
 
         if (result.hasErrors()) {
-            model.addAttribute("customers", customerService.findAll());
+            model.addAttribute("customers", customerClient.findAll());
             model.addAttribute("rooms", List.of());
             return "customers/bookings/form";
         }
@@ -76,7 +76,7 @@ public class BookingController {
 
         if (!success) {
             model.addAttribute("error", "Bokningen kunde inte sparas. Kontrollera datum, rum och antal personer.");
-            model.addAttribute("customers", customerService.findAll());
+            model.addAttribute("customers", customerClient.findAll());
             model.addAttribute("rooms", roomService.findAvailableRooms(
                     bookingDTO.getCheckInDate(),
                     bookingDTO.getCheckOutDate(),
@@ -99,7 +99,7 @@ public class BookingController {
         }
 
         model.addAttribute("booking", bookingDTO);
-        model.addAttribute("customers", customerService.findAll());
+        model.addAttribute("customers", customerClient.findAll());
         model.addAttribute("rooms", roomService.findAvailableRooms(
                 bookingDTO.getCheckInDate(),
                 bookingDTO.getCheckOutDate(),

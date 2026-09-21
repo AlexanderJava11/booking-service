@@ -3,7 +3,6 @@ package alex.villa_avougjagi.service;
 import alex.villa_avougjagi.dto.BookingDTO;
 import alex.villa_avougjagi.models.Booking;
 import alex.villa_avougjagi.repositories.BookingRepository;
-import alex.villa_avougjagi.repositories.CustomerRepository;
 import alex.villa_avougjagi.repositories.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +15,6 @@ import java.util.List;
 public class BookingService {
 
     private final BookingRepository bookingRepository;
-    private final CustomerRepository customerRepository;
     private final RoomRepository roomRepository;
     private final RoomService roomService;
 
@@ -62,7 +60,7 @@ public class BookingService {
                 ? bookingRepository.findById(dto.getId()).orElse(new Booking())
                 : new Booking();
 
-        booking.setCustomer(customerRepository.findById(dto.getCustomerId()).orElseThrow());
+        booking.setCustomerId(dto.getCustomerId());
         booking.setRoom(roomRepository.findById(dto.getRoomId()).orElseThrow());
         booking.setCheckInDate(dto.getCheckInDate());
         booking.setCheckOutDate(dto.getCheckOutDate());
@@ -86,9 +84,7 @@ public class BookingService {
 
         dto.setId(booking.getId());
 
-        dto.setCustomerId(booking.getCustomer().getId());
-        dto.setCustomerFirstName(booking.getCustomer().getFirstName());
-        dto.setCustomerLastName(booking.getCustomer().getLastName());
+        dto.setCustomerId(booking.getCustomerId());
 
         dto.setRoomId((long) booking.getRoom().getId());
         dto.setRoomNumber(booking.getRoom().getRoomNumber());
@@ -105,7 +101,9 @@ public class BookingService {
         );
 
         dto.setNights(nights);
-        dto.setTotalPrice((int) ((int) nights * booking.getRoom().getPricePerNight()));
+        dto.setTotalPrice(
+                (int) (nights * booking.getRoom().getPricePerNight())
+        );
 
         return dto;
     }
