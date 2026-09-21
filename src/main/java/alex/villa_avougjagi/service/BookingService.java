@@ -6,6 +6,7 @@ import alex.villa_avougjagi.repositories.BookingRepository;
 import alex.villa_avougjagi.repositories.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import alex.villa_avougjagi.client.CustomerClient;
 
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -17,6 +18,7 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final RoomRepository roomRepository;
     private final RoomService roomService;
+    private final CustomerClient customerClient;
 
     public List<BookingDTO> findAll() {
         return bookingRepository.findAll()
@@ -32,7 +34,11 @@ public class BookingService {
     }
 
     public boolean saveBooking(BookingDTO dto) {
-        if (dto.getCustomerId() == null || dto.getRoomId() == null) {
+        try {
+            if (customerClient.findById(dto.getCustomerId()) == null) {
+                return false;
+            }
+        } catch (Exception e) {
             return false;
         }
 
@@ -85,6 +91,17 @@ public class BookingService {
         dto.setId(booking.getId());
 
         dto.setCustomerId(booking.getCustomerId());
+        try {
+            var customer = customerClient.findById(booking.getCustomerId());
+
+            if (customer != null) {
+                dto.setCustomerFirstName(customer.getFirstName());
+                dto.setCustomerLastName(customer.getLastName());
+            }
+        } catch (Exception e) {
+            dto.setCustomerFirstName("Okänd");
+            dto.setCustomerLastName("kund");
+        }
 
         dto.setRoomId((long) booking.getRoom().getId());
         dto.setRoomNumber(booking.getRoom().getRoomNumber());
