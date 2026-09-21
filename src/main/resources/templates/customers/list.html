@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Gäster | Villa Avougjagi</title><link rel="stylesheet" th:href="@{/css/hotel.css}"></head>
+<body class="hotel-body">
+<header class="hotel-topbar"><nav class="hotel-nav"><a class="brand" th:href="@{/}">Villa Avougjagi</a><div class="nav-links"><a class="active" th:href="@{/customers}">Gäster</a><a th:href="@{/rooms}">Rum</a><a th:href="@{/bookings}">Bokningar</a><a th:href="@{/bookings/new}">Boka vistelse</a></div></nav></header>
+<main class="container-lux">
+    <div class="page-head"><div><div class="kicker">Gästhantering</div><h1 class="page-title">Gäster</h1><p class="lead">Registrera, ändra och ta bort kunder. Kunder med bokningar kan inte raderas.</p></div><a class="btn-luxury" th:href="@{/customers/new}">Ny gäst</a></div>
+    <div class="alert-lux alert-ok" th:if="${message}" th:text="${message}"></div><div class="alert-lux alert-error" th:if="${error}" th:text="${error}"></div>
+    <section class="card-lux table-wrap"><table class="table-lux"><thead><tr><th>Namn</th><th>E-post</th><th>Telefon</th><th>Åtgärder</th></tr></thead><tbody><tr th:each="customer : ${customers}"><td><strong th:text="${customer.firstName + ' ' + customer.lastName}">Namn</strong></td><td th:text="${customer.email}">mail</td><td th:text="${customer.phone}">telefon</td><td><div class="actions"><a class="btn-soft" th:href="@{/customers/edit/{id}(id=${customer.id})}">Ändra</a><a class="btn-soft btn-danger-soft" data-confirm="Vill du ta bort gästen?" th:href="@{/customers/delete/{id}(id=${customer.id})}">Ta bort</a></div></td></tr></tbody></table></section>
+</main><footer class="footer-note">Villa Avougjagi</footer><script th:src="@{/js/hotel.js}"></script></body></html>

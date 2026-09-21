@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Gäst | Villa Avougjagi</title><link rel="stylesheet" th:href="@{/css/hotel.css}"></head>
+<body class="hotel-body">
+<header class="hotel-topbar"><nav class="hotel-nav"><a class="brand" th:href="@{/}">Villa Avougjagi</a><div class="nav-links"><a class="active" th:href="@{/customers}">Gäster</a><a th:href="@{/rooms}">Rum</a><a th:href="@{/bookings}">Bokningar</a></div></nav></header>
+<main class="container-lux">
+    <div class="page-head"><div><div class="kicker">Gästprofil</div><h1 class="page-title" th:text="${customer.id == null ? 'Ny gäst' : 'Ändra gäst'}">Ny gäst</h1><p class="lead">Fyll i kontaktuppgifter för bokningen.</p></div></div>
+    <section class="card-lux"><form th:action="@{/customers/save}" th:object="${customer}" method="post"><input type="hidden" th:field="*{id}">
+        <div class="form-grid"><div class="field"><label>Förnamn</label><input th:field="*{firstName}" placeholder="Alexander"><div class="error-text" th:errors="*{firstName}"></div></div><div class="field"><label>Efternamn</label><input th:field="*{lastName}" placeholder="Zeljic"><div class="error-text" th:errors="*{lastName}"></div></div><div class="field"><label>E-post</label><input th:field="*{email}" placeholder="namn@mail.se"><div class="error-text" th:errors="*{email}"></div></div><div class="field"><label>Telefon</label><input th:field="*{phone}" placeholder="0701234567"><div class="error-text" th:errors="*{phone}"></div></div></div>
+        <div class="actions" style="margin-top:22px"><button class="btn-luxury" type="submit">Spara gäst</button><a class="btn-outline-luxury" th:href="@{/customers}">Tillbaka</a></div>
+    </form></section>
+</main></body></html>

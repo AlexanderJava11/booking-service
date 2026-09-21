@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Bokningar | Villa Avougjagi</title><link rel="stylesheet" th:href="@{/css/hotel.css}"></head>
+<body class="hotel-body">
+<header class="hotel-topbar"><nav class="hotel-nav"><a class="brand" th:href="@{/}">Villa Avougjagi</a><div class="nav-links"><a th:href="@{/customers}">Gäster</a><a th:href="@{/rooms}">Rum</a><a class="active" th:href="@{/bookings}">Bokningar</a><a th:href="@{/bookings/new}">Boka vistelse</a></div></nav></header>
+<main class="container-lux">
+    <div class="page-head"><div><div class="kicker">Bokningar & vistelser</div><h1 class="page-title">Aktuella bokningar</h1><p class="lead">Avboka eller ändra vistelser. Systemet stoppar överlappande bokningar.</p></div><a class="btn-luxury" th:href="@{/bookings/new}">Ny bokning</a></div>
+    <div class="alert-lux alert-ok" th:if="${message}" th:text="${message}"></div><div class="alert-lux alert-error" th:if="${error}" th:text="${error}"></div>
+    <section class="card-lux table-wrap"><table class="table-lux"><thead><tr><th>Gäst</th><th>Rum</th><th>Datum</th><th>Gäster</th><th>Pris</th><th>Åtgärder</th></tr></thead><tbody><tr th:each="booking : ${bookings}"><td><strong th:text="${booking.customerFirstName + ' ' + booking.customerLastName}">Gäst</strong></td><td><span th:text="${'Rum ' + booking.roomNumber}">Rum</span><br><small th:text="${booking.roomType}">Typ</small></td><td><span th:text="${booking.checkInDate + ' → ' + booking.checkOutDate}">Datum</span><br><small th:text="${booking.nights + ' nätter'}">nätter</small></td><td th:text="${booking.numberOfGuests}">2</td><td><strong th:text="${booking.totalPrice + ' kr'}">0 kr</strong><br><small th:text="${booking.roomPricePerNight + ' kr/natt'}">pris</small></td><td><div class="actions"><a class="btn-soft" th:href="@{/bookings/change/{id}(id=${booking.id})}">Ändra</a><a class="btn-soft btn-danger-soft" data-confirm="Vill du avboka vistelsen?" th:href="@{/bookings/delete/{id}(id=${booking.id})}">Avboka</a></div></td></tr></tbody></table></section>
+</main><script th:src="@{/js/hotel.js}"></script></body></html>

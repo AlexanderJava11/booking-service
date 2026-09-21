@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Villa Avougjagi</title>
+    <link rel="stylesheet" th:href="@{/css/hotel.css}">
+</head>
+<body class="hotel-body">
+<header class="hotel-topbar">
+    <nav class="hotel-nav">
+        <a class="brand" th:href="@{/}">Villa Avougjagi</a>
+        <div class="nav-links">
+            <a th:href="@{/customers}">Gäster</a>
+            <a th:href="@{/rooms}">Rum</a>
+            <a th:href="@{/bookings}">Bokningar</a>
+            <a class="active" th:href="@{/bookings/new}">Boka vistelse</a>
+        </div>
+    </nav>
+</header>
+
+<section class="hero">
+    <div class="hero-content">
+        <div class="kicker">Boutique pensionat • Stockholm</div>
+        <h1>Villa Avougjagi</h1>
+        <p>Ett elegant bokningssystem för gäster, rum och vistelser.</p>
+        <div class="actions" style="justify-content:center">
+            <a class="btn-luxury" th:href="@{/bookings/new}">Sök lediga rum</a>
+            <a class="btn-outline-luxury" th:href="@{/rooms}">Se våra rum</a>
+        </div>
+    </div>
+</section>
+
+<div class="booking-panel">
+    <form class="grid-panel" th:action="@{/bookings/search}" method="post" th:object="${booking}">
+        <input type="hidden" th:field="*{id}">
+        <input type="hidden" th:field="*{customerId}">
+        <input type="hidden" th:field="*{roomId}">
+        <div class="field">
+            <label>Check-in</label>
+            <input type="date" th:field="*{checkInDate}">
+        </div>
+        <div class="field">
+            <label>Check-out</label>
+            <input type="date" th:field="*{checkOutDate}">
+        </div>
+        <div class="field">
+            <label>Antal gäster</label>
+            <input type="number" min="1" th:field="*{numberOfGuests}" placeholder="2">
+        </div>
+        <div class="field">
+            <label>Uppgift</label>
+            <input value="VG-sökning" readonly>
+        </div>
+        <button class="btn-luxury" type="submit">Sök rum</button>
+    </form>
+</div>
+
+<main class="container-lux">
+    <div class="stat-grid">
+        <section class="stat"><strong>01</strong><span>Registrera och ändra kunder. Radering stoppas när bokningar finns.</span></section>
+        <section class="stat"><strong>02</strong><span>Enkelrum, dubbelrum och extrasängar hanteras via rumssidan.</span></section>
+        <section class="stat"><strong>03</strong><span>Sök lediga rum på datumintervall och antal personer enligt VG-kravet.</span></section>
+    </div>
+</main>
+<footer class="footer-note">Made by Alexander Zeljic & Boris Ivis</footer>
+</body>
+</html>

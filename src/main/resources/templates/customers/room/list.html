@@ -1,0 +1,8 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Rum | Villa Avougjagi</title><link rel="stylesheet" th:href="@{/css/hotel.css}"></head>
+<body class="hotel-body">
+<header class="hotel-topbar"><nav class="hotel-nav"><a class="brand" th:href="@{/}">Villa Avougjagi</a><div class="nav-links"><a th:href="@{/customers}">Gäster</a><a class="active" th:href="@{/rooms}">Rum</a><a th:href="@{/bookings}">Bokningar</a><a th:href="@{/bookings/new}">Boka vistelse</a></div></nav></header>
+<main class="container-lux"><div class="page-head"><div><div class="kicker">Rum & sviter</div><h1 class="page-title">Våra rum</h1><p class="lead">Hantera enkelrum, dubbelrum, extrasängar, kapacitet och pris per natt.</p></div><a class="btn-luxury" th:href="@{/rooms/new}">Nytt rum</a></div>
+<section class="room-list"><article class="room-card" th:each="room : ${rooms}"><span class="badge-lux" th:text="${room.roomType == 'SINGLE' ? 'Enkelrum' : 'Dubbelrum'}">Typ</span><h2 th:text="${'Rum ' + room.roomNumber}">Rum 101</h2><p class="lead" th:text="${'Kapacitet: ' + room.capacity + ' gäster • Extrasängar: ' + room.extraBeds}">Kapacitet</p><strong th:text="${room.pricePerNight + ' kr / natt'}">995 kr</strong><div class="actions" style="margin-top:16px"><a class="btn-soft" th:href="@{/rooms/edit/{id}(id=${room.id})}">Ändra</a><a class="btn-soft btn-danger-soft" data-confirm="Vill du ta bort rummet?" th:href="@{/rooms/delete/{id}(id=${room.id})}">Ta bort</a></div></article></section>
+</main><script th:src="@{/js/hotel.js}"></script></body></html>
