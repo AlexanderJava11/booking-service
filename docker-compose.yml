@@ -1,4 +1,4 @@
-services:
+﻿services:
 
   booking-db:
     image: mysql:8.0
@@ -26,6 +26,21 @@ services:
       - customer-db-data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pcustomerpassword"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  review-db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: reviewdb
+      MYSQL_ROOT_PASSWORD: reviewpassword
+    ports:
+      - "3309:3306"
+    volumes:
+      - review-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-previewpassword"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -60,6 +75,20 @@ services:
       customer-db:
         condition: service_healthy
 
+  review-service:
+    build:
+      context: "../review-service"
+    ports:
+      - "8082:8082"
+    environment:
+      REVIEW_DB_URL: "jdbc:mysql://review-db:3306/reviewdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+      REVIEW_DB_USERNAME: root
+      REVIEW_DB_PASSWORD: reviewpassword
+    depends_on:
+      review-db:
+        condition: service_healthy
+
 volumes:
   booking-db-data:
   customer-db-data:
+  review-db-data:
