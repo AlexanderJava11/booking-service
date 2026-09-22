@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking-service
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: booking-service
+
+  template:
+    metadata:
+      labels:
+        app: booking-service
+
+    spec:
+      containers:
+        - name: booking-service
+          image: booking-service:latest
+          imagePullPolicy: Never
+
+          ports:
+            - containerPort: 8080
+
+          env:
+            - name: DB_URL
+              value: jdbc:mysql://booking-db:3306/pensionatendb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+
+            - name: DB_USERNAME
+              value: root
+
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: booking-secret
+                  key: db-password
+
+            - name: CUSTOMER_SERVICE_URL
+              value: http://customer-service:8081
+
+            - name: REVIEW_SERVICE_URL
+              value: http://review-service:8082
+
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: booking-secret
+                  key: jwt-secret
+
+            - name: ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: booking-secret
+                  key: admin-username
+
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: booking-secret
+                  key: admin-password

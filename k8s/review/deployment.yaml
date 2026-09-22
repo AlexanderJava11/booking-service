@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: review-service
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: review-service
+
+  template:
+    metadata:
+      labels:
+        app: review-service
+
+    spec:
+      containers:
+        - name: review-service
+          image: review-service:latest
+          imagePullPolicy: Never
+
+          ports:
+            - containerPort: 8082
+
+          env:
+            - name: REVIEW_DB_URL
+              value: jdbc:mysql://review-db:3306/reviewdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+
+            - name: REVIEW_DB_USERNAME
+              value: root
+
+            - name: REVIEW_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: review-secret
+                  key: db-password
