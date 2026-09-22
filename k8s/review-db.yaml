@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: review-db
+  labels:
+    app: review-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: review-db
+  template:
+    metadata:
+      labels:
+        app: review-db
+    spec:
+      containers:
+        - name: review-db
+          image: mysql:8.0
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_DATABASE
+              value: "reviewdb"
+            - name: MYSQL_ROOT_PASSWORD
+              value: "reviewpassword"
+          readinessProbe:
+            exec:
+              command: ["mysqladmin", "ping", "-h", "localhost", "-previewpassword"]
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            exec:
+              command: ["mysqladmin", "ping", "-h", "localhost", "-previewpassword"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          volumeMounts:
+            - name: review-db-data
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: review-db-data
+          persistentVolumeClaim:
+            claimName: review-db-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: review-db-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: review-db
+  labels:
+    app: review-db
+spec:
+  selector:
+    app: review-db
+  ports:
+    - port: 3306
+      targetPort: 3306
+  type: ClusterIP
