@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Recensioner | Villa Avougjagi</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f7f5f1;
+            color: #2c2c2c;
+        }
+
+        .header {
+            background-color: #1f3a32;
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .header p {
+            margin: 8px 0 0;
+            opacity: 0.85;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 35px auto;
+        }
+
+        .back {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #1f3a32;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+
+        .card {
+            background-color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #1f3a32;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 6px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #cccccc;
+            border-radius: 7px;
+            font-size: 15px;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #1f3a32;
+        }
+
+        textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        .button {
+            display: inline-block;
+            margin-top: 18px;
+            padding: 11px 18px;
+            border: none;
+            border-radius: 7px;
+            background-color: #1f3a32;
+            color: white;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .button:hover {
+            opacity: 0.9;
+        }
+
+        .button-edit {
+            background-color: #96743a;
+        }
+
+        .button-delete {
+            background-color: #9d3636;
+        }
+
+        .button-cancel {
+            background-color: #777777;
+        }
+
+        .review {
+            padding: 20px 0;
+            border-bottom: 1px solid #dddddd;
+        }
+
+        .review:last-child {
+            border-bottom: none;
+        }
+
+        .stars {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .review-comment {
+            font-size: 16px;
+            line-height: 1.5;
+            margin: 10px 0;
+        }
+
+        .customer {
+            color: #666666;
+            font-size: 14px;
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .actions form {
+            margin: 0;
+        }
+
+        .error {
+            color: #b3261e;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .empty {
+            color: #777777;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="header">
+    <h1>⭐ Recensioner</h1>
+    <p>Villa Avougjagi</p>
+</header>
+
+<main class="container">
+
+    <a class="back" th:href="@{/}">
+        ← Till startsidan
+    </a>
+
+    <!--
+        Hjälper IntelliJ att förstå vilken Java-klass
+        variabeln "review" är.
+    -->
+    <!--/*@thymesVar id="review" type="alex.villa_avougjagi.dto.ReviewDTO"*/-->
+
+    <!-- FORMULÄR -->
+    <section class="card">
+
+        <h2 th:if="${review.id == null}">
+            Skriv en recension
+        </h2>
+
+        <h2 th:if="${review.id != null}">
+            Ändra recension
+        </h2>
+
+        <form th:action="@{/reviews/save}"
+              th:object="${review}"
+              method="post">
+
+            <input type="hidden"
+                   th:field="*{id}">
+
+            <!-- KUND-ID -->
+            <label for="customerId">
+                Kund-ID
+            </label>
+
+            <input id="customerId"
+                   type="number"
+                   min="1"
+                   placeholder="Exempel: 1"
+                   th:field="*{customerId}">
+
+            <div class="error"
+                 th:if="${#fields.hasErrors('customerId')}"
+                 th:errors="*{customerId}">
+            </div>
+
+            <!-- BETYG -->
+            <label for="rating">
+                Betyg
+            </label>
+
+            <select id="rating"
+                    th:field="*{rating}">
+
+                <option value="1">⭐ 1</option>
+                <option value="2">⭐⭐ 2</option>
+                <option value="3">⭐⭐⭐ 3</option>
+                <option value="4">⭐⭐⭐⭐ 4</option>
+                <option value="5">⭐⭐⭐⭐⭐ 5</option>
+
+            </select>
+
+            <div class="error"
+                 th:if="${#fields.hasErrors('rating')}"
+                 th:errors="*{rating}">
+            </div>
+
+            <!-- KOMMENTAR -->
+            <label for="comment">
+                Kommentar
+            </label>
+
+            <textarea id="comment"
+                      placeholder="Berätta om din vistelse..."
+                      th:field="*{comment}"></textarea>
+
+            <div class="error"
+                 th:if="${#fields.hasErrors('comment')}"
+                 th:errors="*{comment}">
+            </div>
+
+            <!-- SPARA NY RECENSION -->
+            <button class="button"
+                    type="submit"
+                    th:if="${review.id == null}">
+                ⭐ Skicka recension
+            </button>
+
+            <!-- SPARA ÄNDRING -->
+            <button class="button"
+                    type="submit"
+                    th:if="${review.id != null}">
+                💾 Spara ändringar
+            </button>
+
+            <!-- AVBRYT REDIGERING -->
+            <a class="button button-cancel"
+               th:if="${review.id != null}"
+               th:href="@{/reviews}">
+                Avbryt
+            </a>
+
+        </form>
+
+    </section>
+
+
+    <!--
+        Hjälper IntelliJ att förstå att "reviews"
+        är en lista med ReviewDTO.
+    -->
+    <!--/*@thymesVar id="reviews" type="java.util.List<alex.villa_avougjagi.dto.ReviewDTO>"*/-->
+
+    <!-- ALLA RECENSIONER -->
+    <section class="card">
+
+        <h2>Gästernas recensioner</h2>
+
+        <p class="empty"
+           th:if="${#lists.isEmpty(reviews)}">
+            Det finns inga recensioner ännu.
+        </p>
+
+        <div class="review"
+             th:each="item : ${reviews}">
+
+            <!--
+                Hjälper IntelliJ att förstå vilken typ "item" är.
+            -->
+            <!--/*@thymesVar id="item" type="alex.villa_avougjagi.dto.ReviewDTO"*/-->
+
+            <!-- STJÄRNOR -->
+            <div class="stars">
+                <span th:each="i : ${#numbers.sequence(1, item.rating)}">
+                    ⭐
+                </span>
+            </div>
+
+            <!-- KOMMENTAR -->
+            <p class="review-comment"
+               th:text="${item.comment}">
+                Kommentar
+            </p>
+
+            <!-- KUND -->
+            <p class="customer">
+                Kund-ID:
+                <strong th:text="${item.customerId}">
+                    1
+                </strong>
+            </p>
+
+            <!-- KNAPPAR -->
+            <div class="actions">
+
+                <a class="button button-edit"
+                   th:href="@{/reviews/edit/{id}(id=${item.id})}">
+                    ✏️ Ändra
+                </a>
+
+                <form th:action="@{/reviews/delete/{id}(id=${item.id})}"
+                      method="post">
+
+                    <button class="button button-delete"
+                            type="submit"
+                            onclick="return confirm('Vill du verkligen ta bort recensionen?')">
+                        🗑️ Ta bort
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+</body>
+</html>

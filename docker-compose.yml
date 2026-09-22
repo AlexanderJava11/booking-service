@@ -1,4 +1,4 @@
-﻿services:
+services:
 
   booking-db:
     image: mysql:8.0
@@ -55,6 +55,7 @@
       DB_USERNAME: root
       DB_PASSWORD: bookingpassword
       CUSTOMER_SERVICE_URL: "http://customer-service:8081"
+      REVIEW_SERVICE_URL: "http://review-service:8082"
     depends_on:
       booking-db:
         condition: service_healthy
@@ -92,3 +93,4 @@ volumes:
   booking-db-data:
   customer-db-data:
   review-db-data:
+
