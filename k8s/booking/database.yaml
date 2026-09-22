@@ -25,7 +25,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: booking-secret
-                  key: DB_PASSWORD
+                  key: db-password
 
             - name: MYSQL_DATABASE
               value: pensionatendb
