@@ -1,5 +1,6 @@
 package alex.villa_avougjagi.security;
 
+import org.springframework.http.HttpMethod;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;
@@ -28,7 +29,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers("/api/auth/protected").authenticated()
                         .requestMatchers("/api/bookings/customer/*/active").permitAll()
-                        .requestMatchers("/api/bookings/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/bookings/**").authenticated()
+			.requestMatchers(HttpMethod.PUT, "/api/bookings/**").authenticated()
+			.requestMatchers(HttpMethod.DELETE, "/api/bookings/**").authenticated()
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(
