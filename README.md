@@ -14,7 +14,7 @@ Projektet började som en monolit i Backend 1 och har i Backend 2 byggts om till
 Systemet består av:
 
 - **Booking Service** – bokningar, rum och webbgränssnitt
-- **Customer Service** – kundhantering
+- **Customer Service** – kundhantering och JWT-login
 - **Review Service** – recensioner
 - **Tre separata MySQL-databaser**
 - **REST-kommunikation mellan tjänsterna**
@@ -45,17 +45,17 @@ Systemet består av:
                                  │         │
                        REST/JSON │         │ REST/JSON
                                  │         │
-                    ┌────────────▼───┐   ┌─▼────────────────┐
-                    │ Customer       │   │ Review Service   │
-                    │ Service        │   │ Port 8082        │
-                    │ Port 8081      │   │ Reviews CRUD     │
-                    └───────┬────────┘   └────────┬─────────┘
-                            │                     │
-                            ▼                     ▼
-                    ┌───────────────┐     ┌───────────────┐
-                    │ customer-db   │     │ review-db     │
-                    │    MySQL      │     │    MySQL      │
-                    └───────────────┘     └───────────────┘
+                     ┌───────────▼────┐   ┌▼────────────────┐
+                     │ Customer       │   │ Review Service   │
+                     │ Service        │   │ Port 8082        │
+                     │ Port 8081      │   │ Reviews CRUD     │
+                     └───────┬────────┘   └────────┬─────────┘
+                             │                     │
+                             ▼                     ▼
+                     ┌───────────────┐     ┌───────────────┐
+                     │ customer-db   │     │ review-db     │
+                     │    MySQL      │     │    MySQL      │
+                     └───────────────┘     └───────────────┘
 
                               Booking Service
                                      │
@@ -94,7 +94,7 @@ Booking Service ansvarar för:
 - webbgränssnitt med Thymeleaf
 - kommunikation med Customer Service
 - kommunikation med Review Service
-- JWT-autentisering för skyddade API-endpoints
+- verifiering av JWT för skyddade API-endpoints
 
 ### Rum
 
@@ -152,6 +152,14 @@ DELETE /api/customers/{id}
 ```
 
 Customer Service har en **egen MySQL-databas** och Booking Service har ingen direkt åtkomst till den.
+
+Customer Service ansvarar även för systemets JWT-login.
+
+```http
+POST /api/auth/login
+```
+
+Vid korrekt inloggning skapas en signerad JWT-token som kan användas mot skyddade endpoints i Booking Service.
 
 ### Radering av kund
 
@@ -227,15 +235,15 @@ Systemet använder synkron **REST-kommunikation över HTTP**.
 ```text
 Booking Service
       │
-      ├──── REST ────> Customer Service
+      ├──── REST + Bearer JWT ────> Customer Service
       │
-      └──── REST ────> Review Service
+      └──── REST ─────────────────> Review Service
 
 
 Customer Service
       │
-      └──── REST ────> Booking Service
-                       kontroll av aktiva bokningar
+      └──── REST + Bearer JWT ────> Booking Service
+                                     kontroll av aktiva bokningar
 ```
 
 ### Booking → Customer
@@ -248,6 +256,12 @@ Booking Service använder `CustomerClient` för att bland annat:
 - uppdatera kunder
 - radera kunder
 - kontrollera att en kund finns innan en bokning sparas
+
+Vid service-to-service-kommunikation skickas JWT i HTTP-headern:
+
+```http
+Authorization: Bearer <JWT_TOKEN>
+```
 
 ### Booking → Review
 
@@ -262,6 +276,8 @@ Booking Service använder `ReviewClient` för att:
 ### Customer → Booking
 
 Customer Service använder `BookingClient` för att kontrollera om kunden har en aktiv bokning innan kunden får raderas.
+
+Även detta service-to-service-anrop skickar JWT som Bearer-token.
 
 ---
 
@@ -287,45 +303,74 @@ Det skyddar systemets data från att exempelvis en kund med en aktiv bokning rad
 
 Som en del av VG-funktionaliteten används **JSON Web Token (JWT)**.
 
-JWT används för att skydda delar av Booking Services REST-API.
+JWT används för att skydda de endpoints i Booking Service som ändrar bokningsdata.
 
-## Login
+## Login i Customer Service
+
+Login hanteras av **Customer Service**:
 
 ```http
 POST /api/auth/login
 ```
 
-Användaren skickar sina inloggningsuppgifter och får, om de är korrekta, tillbaka en signerad JWT-token.
+Användaren skickar användarnamn och lösenord till Customer Service.
 
-Tokenet har en begränsad giltighetstid.
+Om uppgifterna är korrekta skapar `JwtService` en signerad JWT-token som returneras till klienten.
 
-## Skyddad endpoint
+Token har en begränsad giltighetstid.
 
-Exempel:
+## Bearer-token
 
-```http
-GET /api/auth/protected
-```
-
-Token skickas med requesten:
+Token skickas därefter i HTTP-headern:
 
 ```http
 Authorization: Bearer <JWT_TOKEN>
 ```
 
-`JwtAuthenticationFilter` läser token från requesten och `JwtService` verifierar bland annat signaturen och giltigheten.
+Booking Services `JwtAuthenticationFilter` läser token från requesten och verifierar den med hjälp av `JwtService`.
 
-Spring Security använder därefter informationen för att avgöra om requesten är autentiserad.
+Customer Service och Booking Service använder samma JWT-secret så att en token som skapas av Customer Service kan verifieras av Booking Service.
 
-De skyddade Booking API-endpointsen kräver JWT.
+## Skyddade Booking-endpoints
 
-Det interna endpointet:
+Endpoints som ändrar bokningsdata kräver giltig JWT.
+
+Exempel:
 
 ```http
-GET /api/bookings/customer/{customerId}/active
+POST   /api/bookings
+PUT    /api/bookings/{id}
+DELETE /api/bookings/{id}
 ```
 
-är däremot öppet eftersom Customer Service måste kunna använda det för kontrollen innan en kund raderas.
+Om en sådan request skickas utan giltig JWT returneras `403 Forbidden`.
+
+Med en giltig token från Customer Service tillåts operationen.
+
+JWT-flödet har verifierats både lokalt med Docker Compose och i Railway:
+
+```text
+Customer Service
+      │
+      │ POST /api/auth/login
+      ▼
+   JWT-token
+      │
+      │ Authorization: Bearer <JWT_TOKEN>
+      ▼
+Booking Service
+      │
+      ▼
+Skyddad bokningsoperation
+```
+
+## JWT mellan tjänster
+
+När Booking Service anropar Customer Service skickas en Bearer-token.
+
+När Customer Service anropar Booking Service skickas också en Bearer-token.
+
+Det innebär att JWT används både för skyddade bokningsoperationer och vid service-to-service-kommunikation.
 
 ---
 
@@ -585,6 +630,8 @@ valueFrom:
     key: jwt-secret
 ```
 
+Customer Service och Booking Service konfigureras med samma JWT-secret så att tokens kan skapas och verifieras mellan tjänsterna.
+
 Värden som finns i projektet är endast avsedda för **lokal utveckling/demonstration**.
 
 Riktiga produktionshemligheter ska inte sparas i Git.
@@ -605,7 +652,9 @@ REVIEW_SERVICE_URL
 BOOKING_SERVICE_URL
 ```
 
-Databasuppgifter och säkerhetsvärden konfigureras också via environment variables och ska inte hårdkodas i källkoden.
+Databasuppgifter, JWT-secret och inloggningsuppgifter konfigureras också via environment variables och ska inte hårdkodas som produktionshemligheter i källkoden.
+
+JWT-flödet mellan Customer Service och Booking Service har verifierats i Railway.
 
 ---
 
@@ -621,19 +670,22 @@ Databasuppgifter och säkerhetsvärden konfigureras också via environment varia
 | `CUSTOMER_SERVICE_URL` | URL till Customer Service |
 | `REVIEW_SERVICE_URL` | URL till Review Service |
 | `JWT_SECRET` | Nyckel för signering/verifiering av JWT |
-| `ADMIN_USERNAME` | Admin-användarnamn |
-| `ADMIN_PASSWORD` | Admin-lösenord |
+| `ADMIN_USERNAME` | Lokalt admin-användarnamn |
+| `ADMIN_PASSWORD` | Lokalt admin-lösenord |
 
 ## Customer Service
 
-Customer Service använder bland annat:
+| Variabel | Beskrivning |
+|---|---|
+| `CUSTOMER_DB_URL` | JDBC-URL till Customer-databasen |
+| `CUSTOMER_DB_USERNAME` | Databasanvändare |
+| `CUSTOMER_DB_PASSWORD` | Databaslösenord |
+| `BOOKING_SERVICE_URL` | URL till Booking Service |
+| `JWT_SECRET` | Nyckel för signering/verifiering av JWT |
+| `ADMIN_USERNAME` | Användarnamn för JWT-login |
+| `ADMIN_PASSWORD` | Lösenord för JWT-login |
 
-```text
-DB_URL
-DB_USERNAME
-DB_PASSWORD
-BOOKING_SERVICE_URL
-```
+Customer Service och Booking Service måste använda samma `JWT_SECRET` för att Booking Service ska kunna verifiera tokens som skapats av Customer Service.
 
 ## Review Service
 
@@ -662,6 +714,14 @@ På Windows:
 Testmiljön använder H2 där det är lämpligt för att testerna ska kunna köras isolerat från produktionsdatabasen.
 
 Customer Service innehåller även integrationstester för REST/API-funktionalitet.
+
+JWT har dessutom testats genom att:
+
+1. logga in via Customer Service,
+2. hämta en JWT-token,
+3. försöka skapa en bokning utan token och få `403 Forbidden`,
+4. skicka samma request med `Authorization: Bearer <JWT_TOKEN>`,
+5. verifiera att bokningen skapas med giltig token.
 
 ---
 
@@ -791,7 +851,9 @@ Projektet innehåller:
 - ✅ Validering och felhantering
 - ✅ Skydd mot radering av kund med aktiv bokning
 - ✅ Hantering när annan microservice inte är tillgänglig
-- ✅ JWT Authentication
+- ✅ JWT-login via Customer Service
+- ✅ JWT-skydd för ändrande Booking-endpoints
+- ✅ Bearer-token vid service-to-service-kommunikation
 - ✅ Automatiserade tester
 - ✅ Docker
 - ✅ Docker Compose
