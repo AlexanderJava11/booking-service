@@ -39,3 +39,21 @@ spec:
 
             - name: BOOKING_SERVICE_URL
               value: http://booking-service:8080
+
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: customer-secret
+                  key: jwt-secret
+
+            - name: ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: customer-secret
+                  key: admin-username
+
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: customer-secret
+                  key: admin-password
