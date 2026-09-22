@@ -22,7 +22,10 @@ spec:
 
           env:
             - name: MYSQL_ROOT_PASSWORD
-              value: bookingpassword
+              valueFrom:
+                secretKeyRef:
+                  name: booking-secret
+                  key: DB_PASSWORD
 
             - name: MYSQL_DATABASE
               value: pensionatendb
