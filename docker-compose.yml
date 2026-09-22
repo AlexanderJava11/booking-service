@@ -56,6 +56,7 @@ services:
       DB_PASSWORD: bookingpassword
       CUSTOMER_SERVICE_URL: "http://customer-service:8081"
       REVIEW_SERVICE_URL: "http://review-service:8082"
+      JWT_SECRET: "my-super-secret-jwt-key-that-is-long-enough-123456"
     depends_on:
       booking-db:
         condition: service_healthy
@@ -72,6 +73,9 @@ services:
       CUSTOMER_DB_USERNAME: root
       CUSTOMER_DB_PASSWORD: customerpassword
       BOOKING_SERVICE_URL: "http://booking-service:8080"
+      JWT_SECRET: "my-super-secret-jwt-key-that-is-long-enough-123456"
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: admin123
     depends_on:
       customer-db:
         condition: service_healthy
@@ -93,4 +97,3 @@ volumes:
   booking-db-data:
   customer-db-data:
   review-db-data:
-
